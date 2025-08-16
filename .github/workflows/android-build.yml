@@ -21,9 +21,13 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Install and Configure Android SDK
+    - name: Set up Android SDK paths and components
       run: |
-        # Menginstal command-line tools
+        # Membersihkan variabel lingkungan yang tidak diinginkan
+        echo "## Menghapus ANDROID_SDK_ROOT jika ada"
+        unset ANDROID_SDK_ROOT
+        
+        # Membuat direktori untuk SDK dan mengunduh command-line tools terbaru
         mkdir -p $HOME/android-sdk/cmdline-tools
         cd $HOME/android-sdk
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip
