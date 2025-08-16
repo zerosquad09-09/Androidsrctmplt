@@ -21,25 +21,14 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    # Langkah baru: Menginstal dan mengatur Android SDK
-    - name: Install Android SDK
-      run: |
-        echo "y" | sudo apt-get update
-        echo "y" | sudo apt-get install openjdk-17-jdk
-        echo "y" | sudo apt-get install android-sdk
-        
-    - name: Set up Android SDK paths
-      run: |
-        echo "ANDROID_HOME=/usr/lib/android-sdk" >> $GITHUB_ENV
-        echo "/usr/lib/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-        echo "/usr/lib/android-sdk/platform-tools" >> $GITHUB_PATH
-
-    # Langkah untuk menginstal komponen SDK
+    # Menggunakan aksi `rkr-b/android-sdk` untuk menginstal dan mengatur SDK
     - name: Install Android SDK components
-      run: |
-        sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34" "cmdline-tools;latest" "cmake;3.10.2.4988404" "ndk;23.2.8568313"
-      env:
-        ANDROID_SDK_HOME: /usr/lib/android-sdk
+      uses: rkr-b/android-sdk@v1.1
+      with:
+        android-platform-version: '34'
+        android-build-tools-version: '34.0.0'
+        android-cmake-version: '3.10.2.4988404'
+        android-ndk-version: '23.2.8568313'
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -52,4 +41,3 @@ jobs:
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/app-debug.apk
-
