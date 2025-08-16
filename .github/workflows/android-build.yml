@@ -20,23 +20,36 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-    
-    # Menggunakan aksi yang lebih fungsional untuk menginstal semuanya
-    - name: Install Android SDK components
-      uses: reactivecircus/android-build-action@v2
-      with:
-        # Aksi ini akan secara otomatis menginstal versi yang dibutuhkan oleh proyek Anda
-        # berdasarkan konfigurasi di build.gradle.
-        # Anda tidak perlu lagi menentukan versi secara eksplisit di sini.
-        # Cukup panggil aksi ini sebelum menjalankan Gradle.
-        # PENTING: Pastikan build.gradle Anda sudah mengunci versi NDK dan CMake
-        # misalnya: ndkVersion = "23.2.8568313"
+
+    - name: Install and Configure Android SDK
+      run: |
+        # Membuat direktori untuk SDK dan mengunduh command-line tools terbaru
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        cd $HOME/android-sdk
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip
+        unzip -q commandlinetools-linux-12266719_latest.zip -d $HOME/android-sdk/cmdline-tools/
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+
+        # Menambahkan path SDK ke variabel lingkungan
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+        # Menyetujui lisensi SDK
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+
+        # Menginstal komponen yang diperlukan
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+          "platform-tools" \
+          "build-tools;34.0.0" \
+          "platforms;android-34" \
+          "cmake;3.10.2.4988404" \
+          "ndk;23.2.8568313"
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew assembleDebug --refresh-dependencies
+      run: ./gradlew assembleDebug --info --refresh-dependencies
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
