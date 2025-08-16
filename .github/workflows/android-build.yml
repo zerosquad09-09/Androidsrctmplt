@@ -21,28 +21,16 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Set up Android SDK paths and components
+    - name: Install Android SDK components
       run: |
-        # Membersihkan variabel lingkungan yang tidak diinginkan
-        echo "## Menghapus ANDROID_SDK_ROOT jika ada"
-        unset ANDROID_SDK_ROOT
+        # Menggunakan lokasi SDK yang sudah ada dan ditetapkan oleh runner.
+        # Anda tidak perlu mengunduh lagi command line tools karena sudah ada.
         
-        # Membuat direktori untuk SDK dan mengunduh command-line tools terbaru
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        cd $HOME/android-sdk
-        wget -q https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip
-        unzip -q commandlinetools-linux-12266719_latest.zip -d $HOME/android-sdk/cmdline-tools/
-        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-
-        # Menetapkan hanya ANDROID_HOME dan menambahkan path SDK
-        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
         # Menyetujui lisensi SDK
-        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | sdkmanager --licenses
 
-        # Menginstal komponen yang diperlukan
-        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+        # Menginstal komponen yang dibutuhkan
+        sdkmanager \
           "platform-tools" \
           "build-tools;34.0.0" \
           "platforms;android-34" \
