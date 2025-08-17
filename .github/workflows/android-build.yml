@@ -14,7 +14,6 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # Langkah ini akan menghemat waktu build
     - name: Cache Gradle
       uses: actions/cache@v4
       with:
@@ -31,7 +30,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # Langkah instalasi SDK, tidak perlu diubah lagi
     - name: Configure Android SDK and Install Components
       run: |
         ANDROID_HOME_PATH="/usr/local/lib/android/sdk"
@@ -45,14 +43,30 @@ jobs:
           "cmake;3.10.2.4988404" \
           "ndk;23.2.8568313"
 
+    - name: Decode and Save Keystore
+      env:
+        KEYSTORE_BASE64: ${{ secrets.KEYSAYA }}
+      run: |
+        echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      run: ./gradlew assembleDebug --stacktrace
+      env:
+        # Gunakan GitHub Secrets sebagai variabel lingkungan untuk Gradle
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        ./gradlew assembleRelease --stacktrace \
+          -Prelease_keystore_file=keystore.jks \
+          -Prelease_keystore_password="$KEYSTORE_PASSWORD" \
+          -Prelease_keystore_alias="$KEY_ALIAS" \
+          -Prelease_key_password="$KEY_PASSWORD"
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: android_release
+        path: app/build/outputs/apk/release/android_release.apk
