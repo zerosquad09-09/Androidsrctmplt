@@ -47,11 +47,14 @@ jobs:
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSAYA }}
       run: |
-       mkdir - app
+       mkdir -p app
         echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
+    - name: Clean Gradle cache
+      run: rm -rf ~/.gradle/caches
 
     - name: Build with Gradle
       env:
