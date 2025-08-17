@@ -23,18 +23,14 @@ jobs:
 
     - name: Configure Android SDK and Install Components
       run: |
-        # Cari jalur SDK yang ada di runner
+        # Mengatur variabel lingkungan dan PATH dalam satu blok
         ANDROID_HOME_PATH="/usr/local/lib/android/sdk"
-        
-        # Tambahkan jalur cmdline-tools ke PATH
         echo "ANDROID_HOME=$ANDROID_HOME_PATH" >> $GITHUB_ENV
         echo "$ANDROID_HOME_PATH/cmdline-tools/latest/bin" >> $GITHUB_PATH
-        
-        # Menyetujui lisensi SDK
-        yes | sdkmanager --licenses
-        
-        # Menginstal komponen yang dibutuhkan
-        sdkmanager \
+
+        # Menyetujui lisensi dan menginstal komponen dalam satu baris
+        yes | $ANDROID_HOME_PATH/cmdline-tools/latest/bin/sdkmanager --licenses \
+        && $ANDROID_HOME_PATH/cmdline-tools/latest/bin/sdkmanager \
           "platform-tools" \
           "build-tools;34.0.0" \
           "platforms;android-34" \
