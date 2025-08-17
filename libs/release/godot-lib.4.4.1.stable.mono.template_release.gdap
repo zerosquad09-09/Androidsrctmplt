@@ -2,4 +2,4 @@
 
 name="android tenplate"
 binary_type="remot"
-binary="https://github.com/godotengine/godot/releases/download/4.4.1-stable/godot-lib.4.4.1.stable.mono.template_release.aar"
+binary="https://github.com/godotengine/godot/releases/download/4.4.1-stable/godot-lib.4.4.1.stable.template_release.aar"
