@@ -43,8 +43,15 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Clean Gradle cache
-      run: rm -rf ~/.gradle/caches
+    - name: Gradle Wrapper Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
 
     - name: Build with Gradle
       env:
@@ -64,3 +71,4 @@ jobs:
       with:
         name: android_release
         path: app/build/outputs/apk/release/app-release.apk
+
