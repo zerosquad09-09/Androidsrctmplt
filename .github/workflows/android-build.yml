@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Repository
@@ -54,7 +54,7 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: |
         ./gradlew assembleRelease --stacktrace \
-          -Prelease_keystore_file=keystore.jks \
+          -Prelease_keystore_file=app/keystore.jks \
           -Prelease_keystore_password="$KEYSTORE_PASSWORD" \
           -Prelease_keystore_alias="$KEY_ALIAS" \
           -Prelease_key_password="$KEY_PASSWORD"
@@ -63,4 +63,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: android_release
-        path: app/build/outputs/apk/release/android_release.apk
+        path: app/build/outputs/apk/release/app-release.apk
