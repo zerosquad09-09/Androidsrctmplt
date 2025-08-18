@@ -33,11 +33,17 @@ jobs:
           "cmake;3.10.2.4988404" \
           "ndk;23.2.8568313"
 
+    - name: Download Godot Android AAR
+      run: |
+        mkdir -p app/libs/release
+        curl -L https://github.com/godotengine/godot/releases/download/4.4.1-stable/godot-lib.4.4.1.stable.template_release.aar \
+          -o app/libs/godot-lib.4.4.1.stable.template_release.aar
+
     - name: Decode and Save Keystore
       env:
         KEYSTORE_BASE64: ${{ secrets.KEYSAYA }}
       run: |
-       mkdir -p app
+        mkdir -p app
         echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
 
     - name: Grant execute permission for gradlew
@@ -55,7 +61,6 @@ jobs:
 
     - name: Build with Gradle
       env:
-        # Gunakan GitHub Secrets sebagai variabel lingkungan untuk Gradle
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -71,4 +76,3 @@ jobs:
       with:
         name: android_release
         path: app/build/outputs/apk/release/app-release.apk
-
