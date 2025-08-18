@@ -70,7 +70,10 @@ jobs:
           -Prelease_keystore_password="$KEYSTORE_PASSWORD" \
           -Prelease_keystore_alias="$KEY_ALIAS" \
           -Prelease_key_password="$KEY_PASSWORD"
-    
+
+    - name: List APKs
+      run: find . -name "*.apk"
+       
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
