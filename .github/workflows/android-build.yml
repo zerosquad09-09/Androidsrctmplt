@@ -37,7 +37,7 @@ jobs:
       run: |
         mkdir -p libs/release
         curl -L https://github.com/godotengine/godot/releases/download/4.4.1-stable/godot-lib.4.4.1.stable.template_release.aar \
-          -o app/libs/godot-lib.4.4.1.stable.template_release.aar
+          -o libs/release/godot-lib.4.4.1.stable.template_release.aar
 
     - name: Decode and Save Keystore
       env:
