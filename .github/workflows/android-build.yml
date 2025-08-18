@@ -1,10 +1,13 @@
 name: Upload AAR to Release
 
 on:
-  workflow_dispatch:   # jalan manual lewat tab Actions
+  workflow_dispatch:   # manual
   push:
     tags:
-      - 'v*'           # jalan kalau push tag (contoh: v1.0.0)
+      - 'v*'           # hanya tag dengan huruf kecil "v"
+
+permissions:
+  contents: write      # penting! biar bisa bikin release
 
 jobs:
   release:
