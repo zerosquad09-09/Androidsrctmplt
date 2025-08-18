@@ -35,7 +35,7 @@ jobs:
 
     - name: Download Godot Android AAR
       run: |
-        mkdir -p app/libs/release
+        mkdir -p libs/release
         curl -L https://github.com/godotengine/godot/releases/download/4.4.1-stable/godot-lib.4.4.1.stable.template_release.aar \
           -o app/libs/godot-lib.4.4.1.stable.template_release.aar
 
