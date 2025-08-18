@@ -104,7 +104,10 @@ android {
         targetSdkVersion getExportTargetSdkVersion()
 
         ndk {
-            abiFilters getExportEnabledABIs()
+            // FIX for Gradle 8.2.1: expand into multiple calls
+            getExportEnabledABIs().each { abi ->
+                abiFilters abi
+            }
         }
 
         manifestPlaceholders = [
