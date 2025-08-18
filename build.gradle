@@ -1,5 +1,4 @@
 // Gradle build config for Godot Engine's Android port.
-
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
@@ -7,121 +6,84 @@ plugins {
 
 apply from: 'config.gradle'
 
-// -------------------------------------------------------------------
-// Repositories
-// -------------------------------------------------------------------
 allprojects {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
         maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/"}
 
-        // Godot user plugins custom Maven repos
+        // Godot user plugins custom maven repos
         String[] mavenRepos = getGodotPluginsMavenRepos()
         if (mavenRepos != null && mavenRepos.size() > 0) {
             for (String repoUrl : mavenRepos) {
-                maven { url repoUrl }
+                maven {
+                    url repoUrl
+                }
             }
         }
     }
 }
 
-// -------------------------------------------------------------------
-// Configurations
-// -------------------------------------------------------------------
 configurations {
+    // Initializes a placeholder for the devImplementation dependency configuration.
     devImplementation {}
+    // Initializes a placeholder for the monoImplementation dependency configuration.
     monoImplementation {}
 }
 
-// -------------------------------------------------------------------
-// Dependencies
-// -------------------------------------------------------------------
 dependencies {
-    // Ads / mediation SDKs
     implementation "com.google.ads.mediation:adcolony:4.8.0.2"
     implementation "com.google.ads.mediation:facebook:6.14.0.0"
     implementation "com.google.ads.mediation:vungle:6.12.1.1"
     implementation "com.google.android.gms:play-services-ads:23.3.0"
-
-    // AndroidX
     implementation "androidx.fragment:fragment:$versions.fragmentVersion"
     implementation "androidx.core:core-splashscreen:$versions.splashscreenVersion"
 
-    // Godot Engine lib (choose: project or prebuilt AAR)
     if (rootProject.findProject(":lib")) {
         implementation project(":lib")
     } else if (rootProject.findProject(":godot:lib")) {
         implementation project(":godot:lib")
     } else {
-        debugImplementation   fileTree(dir: 'libs/debug', include: ['**/*.jar', '*.aar'])
-        devImplementation     fileTree(dir: 'libs/dev',   include: ['**/*.jar', '*.aar'])
+        // Godot gradle build mode. In this scenario this project is the only one around and the Godot
+        // library is available through the pre-generated godot-lib.*.aar android archive files.
+        debugImplementation fileTree(dir: 'libs/debug', include: ['**/*.jar', '*.aar'])
+        devImplementation fileTree(dir: 'libs/dev', include: ['**/*.jar', '*.aar'])
         releaseImplementation fileTree(dir: 'libs/release', include: ['**/*.jar', '*.aar'])
     }
 
-    // Godot user plugins (remote deps)
+    // Godot user plugins remote dependencies
     String[] remoteDeps = getGodotPluginsRemoteBinaries()
     if (remoteDeps != null && remoteDeps.size() > 0) {
-        for (String dep : remoteDeps) implementation dep
+        for (String dep : remoteDeps) {
+            implementation dep
+        }
     }
 
-    // Godot user plugins (local deps)
+    // Godot user plugins local dependencies
     String[] pluginsBinaries = getGodotPluginsLocalBinaries()
     if (pluginsBinaries != null && pluginsBinaries.size() > 0) {
         implementation files(pluginsBinaries)
     }
 
-    // Auto-pickup addons (res://addons)
+    // Automatically pick up local dependencies in res://addons
     String addonsDirectory = getAddonsDirectory()
     if (addonsDirectory != null && !addonsDirectory.isBlank()) {
         implementation fileTree(dir: "$addonsDirectory", include: ['*.jar', '*.aar'])
     }
 
-    // .NET support
+    // .NET dependencies
     String jar = '../../../../modules/mono/thirdparty/libSystem.Security.Cryptography.Native.Android.jar'
     if (file(jar).exists()) {
         monoImplementation files(jar)
     }
 }
 
-// -------------------------------------------------------------------
-// Android Config
-// -------------------------------------------------------------------
 android {
-    namespace 'com.godot.game'
-
     compileSdkVersion versions.compileSdk
     buildToolsVersion versions.buildTools
     ndkVersion versions.ndkVersion
-
-    defaultConfig {
-        applicationId getExportPackageName()
-        versionCode getExportVersionCode()
-        versionName getExportVersionName()
-        minSdkVersion getExportMinSdkVersion()
-        targetSdkVersion getExportTargetSdkVersion()
-
-        ndk {
-            // FIX for Gradle 8.2.1: expand into multiple calls
-            getExportEnabledABIs().each { abi ->
-                abiFilters abi
-            }
-        }
-
-        manifestPlaceholders = [
-            godotEditorVersion   : getGodotEditorVersion(),
-            godotRenderingMethod : getGodotRenderingMethod()
-        ]
-
-        missingDimensionStrategy 'products', 'template'
-
-        aaptOptions {
-            // Allow Godot hidden files
-            ignoreAssetsPattern "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
-        }
-    }
 
     compileOptions {
         sourceCompatibility versions.javaVersion
@@ -132,19 +94,61 @@ android {
         jvmTarget = versions.javaVersion
     }
 
+    assetPacks = [":assetPacks:installTime"]
+
+    namespace = 'com.godot.game'
+
+    defaultConfig {
+        // The default ignore pattern for the 'assets' directory includes hidden files and directories which are used by Godot projects.
+        aaptOptions {
+            ignoreAssetsPattern "!.svn:!.git:!.gitignore:!.ds_store:!*.scc:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+        }
+
+        ndk {
+            String[] export_abi_list = getExportEnabledABIs()
+            abiFilters export_abi_list
+        }
+
+        manifestPlaceholders = [
+            godotEditorVersion: getGodotEditorVersion(),
+            godotRenderingMethod: getGodotRenderingMethod()
+        ]
+
+        // Feel free to modify the application id to your own.
+        applicationId getExportPackageName()
+        versionCode getExportVersionCode()
+        versionName getExportVersionName()
+        minSdkVersion getExportMinSdkVersion()
+        targetSdkVersion getExportTargetSdkVersion()
+
+        missingDimensionStrategy 'products', 'template'
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'MissingTranslation', 'UnusedResources'
+    }
+
+    ndkVersion versions.ndkVersion
+
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
 
+        // 'doNotStrip' is enabled for development within Android Studio
         if (shouldNotStrip()) {
             doNotStrip '**/*.so'
         }
 
         jniLibs {
+            // Setting this to true causes AGP to package compressed native libraries when building the app
+            // For more background, see:
+            // - https://developer.android.com/build/releases/past-releases/agp-3-6-0-release-notes#extractNativeLibs
+            // - https://stackoverflow.com/a/44704840
             useLegacyPackaging shouldUseLegacyPackaging()
         }
 
-        // Ensure Godot’s libc++_shared.so wins over deps
+        // Always select Godot's version of libc++_shared.so in case deps have their own
         pickFirst 'lib/x86/libc++_shared.so'
         pickFirst 'lib/x86_64/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
@@ -154,14 +158,15 @@ android {
     signingConfigs {
         debug {
             if (hasCustomDebugKeystore()) {
-                storeFile file(getDebugKeystoreFile())
+                storeFile new File(getDebugKeystoreFile())
                 storePassword getDebugKeystorePassword()
                 keyAlias getDebugKeyAlias()
                 keyPassword getDebugKeystorePassword()
             }
         }
+
         release {
-            File keystoreFile = file(getReleaseKeystoreFile())
+            File keystoreFile = new File(getReleaseKeystoreFile())
             if (keystoreFile.isFile()) {
                 storeFile keystoreFile
                 storePassword getReleaseKeystorePassword()
@@ -171,23 +176,49 @@ android {
         }
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
+
         debug {
+            // Signing and zip-aligning are skipped for prebuilt builds, but
+            // performed for Godot gradle builds.
             zipAlignEnabled shouldZipAlign()
-            signingConfig shouldSign() ? signingConfigs.debug : null
+            if (shouldSign()) {
+                signingConfig signingConfigs.debug
+            } else {
+                signingConfig null
+            }
         }
+
         dev {
             initWith debug
+            // Signing and zip-aligning are skipped for prebuilt builds, but
+            // performed for Godot gradle builds.
             zipAlignEnabled shouldZipAlign()
-            signingConfig shouldSign() ? signingConfigs.debug : null
+            if (shouldSign()) {
+                signingConfig signingConfigs.debug
+            } else {
+                signingConfig null
+            }
         }
+
         release {
+            // Signing and zip-aligning are skipped for prebuilt builds, but
+            // performed for Godot gradle builds.
             zipAlignEnabled shouldZipAlign()
-            signingConfig shouldSign() ? signingConfigs.release : null
+            if (shouldSign()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig null
+            }
         }
     }
 
     flavorDimensions 'edition'
+
     productFlavors {
         standard {}
         mono {}
@@ -201,8 +232,8 @@ android {
             aidl.srcDirs = ['aidl']
             assets.srcDirs = ['assets']
         }
-        debug.jniLibs.srcDirs   = ['libs/debug', 'libs/debug/vulkan_validation_layers']
-        dev.jniLibs.srcDirs     = ['libs/dev']
+        debug.jniLibs.srcDirs = ['libs/debug', 'libs/debug/vulkan_validation_layers']
+        dev.jniLibs.srcDirs = ['libs/dev']
         release.jniLibs.srcDirs = ['libs/release']
     }
 
@@ -214,41 +245,53 @@ android {
     }
 }
 
-// -------------------------------------------------------------------
-// Tasks
-// -------------------------------------------------------------------
 task copyAndRenameBinary(type: Copy) {
-    doNotTrackState("No need for up-to-date checks")
+    // The 'doNotTrackState' is added to disable gradle's up-to-date checks for output files
+    // and directories. Otherwise this check may cause permissions access failures on Windows
+    // machines.
+    doNotTrackState("No need for up-to-date checks for the copy-and-rename operation")
 
-    String exportPath     = getExportPath()
+    String exportPath = getExportPath()
     String exportFilename = getExportFilename()
-    String exportEdition  = getExportEdition()
+    String exportEdition = getExportEdition()
     String exportBuildType = getExportBuildType()
-    String exportFormat   = getExportFormat()
+    String exportBuildTypeCapitalized = exportBuildType.capitalize()
+    String exportFormat = getExportFormat()
 
-    boolean isAab  = exportFormat == "aab"
+    boolean isAab = exportFormat == "aab"
     boolean isMono = exportEdition == "mono"
-    String filenameSuffix = isMono ? (isAab ? "${exportEdition}-${exportBuildType}" : "${exportEdition}${exportBuildType.capitalize()}") 
-                                   : (isAab ? "${exportEdition}-${exportBuildType}" : exportBuildType)
+    String filenameSuffix = isAab ? "${exportEdition}-${exportBuildType}" : exportBuildType
+    if (isMono) {
+        filenameSuffix = isAab ? "${exportEdition}-${exportBuildType}" : "${exportEdition}${exportBuildTypeCapitalized}"
+    }
 
     String sourceFilename = isAab ? "build-${filenameSuffix}.aab" : "android_${filenameSuffix}.apk"
-    String sourceFilepath = isAab ? "$buildDir/outputs/bundle/${exportEdition}${exportBuildType.capitalize()}/$sourceFilename"
-                                  : "$buildDir/outputs/apk/$exportEdition/$exportBuildType/$sourceFilename"
+    String sourceFilepath = isAab ? "$buildDir/outputs/bundle/${exportEdition}${exportBuildTypeCapitalized}/$sourceFilename" : "$buildDir/outputs/apk/$exportEdition/$exportBuildType/$sourceFilename"
 
     from sourceFilepath
     into exportPath
     rename sourceFilename, exportFilename
 }
 
+/**
+ * Used to validate the version of the Java SDK used for the Godot gradle builds.
+ */
 task validateJavaVersion {
     if (JavaVersion.current() != versions.javaVersion) {
-        throw new GradleException("Invalid Java version ${JavaVersion.current()}. Required: ${versions.javaVersion}")
+        throw new GradleException("Invalid Java version ${JavaVersion.current()}. Version ${versions.javaVersion} is the required Java version for Godot gradle builds.")
     }
 }
 
-// Ensure app preBuild runs after AAR copy
-["copyDebugAARToAppModule", "copyDevAARToAppModule", "copyReleaseAARToAppModule"].each { taskName ->
-    if (rootProject.tasks.findByPath(taskName) != null) {
-        preBuild.mustRunAfter(rootProject.tasks.named(taskName))
-    }
+/*
+When they're scheduled to run, the copy*AARToAppModule tasks generate dependencies for the 'app'
+module, so we're ensuring the ':app:preBuild' task is set to run after those tasks.
+ */
+if (rootProject.tasks.findByPath("copyDebugAARToAppModule") != null) {
+    preBuild.mustRunAfter(rootProject.tasks.named("copyDebugAARToAppModule"))
+}
+if (rootProject.tasks.findByPath("copyDevAARToAppModule") != null) {
+    preBuild.mustRunAfter(rootProject.tasks.named("copyDevAARToAppModule"))
+}
+if (rootProject.tasks.findByPath("copyReleaseAARToAppModule") != null) {
+    preBuild.mustRunAfter(rootProject.tasks.named("copyReleaseAARToAppModule"))
 }
