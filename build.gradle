@@ -34,6 +34,11 @@ configurations {
 }
 
 dependencies {
+    implementation files('libs/release/poing-godot-admob-ads-v1.0.1-release.aar')
+    implementation files('libs/release/poing-godot-admob-adcolony-v1.0.0-release.aar')
+    implementation files('libs/release/poing-godot-admob-core-v1.0.1-release.aar')
+    implementation files('libs/release/poing-godot-admob-meta-v1.0.0-release.aar')
+    implementation files('libs/release/poing-godot-admob-vungle-v1.0.0-release.aar')
     implementation "com.google.ads.mediation:adcolony:4.8.0.2"
     implementation "com.google.ads.mediation:facebook:6.14.0.0"
     implementation "com.google.ads.mediation:vungle:6.12.1.1"
