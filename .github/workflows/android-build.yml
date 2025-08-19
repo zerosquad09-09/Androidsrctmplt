@@ -4,7 +4,7 @@ on:
   workflow_dispatch:   # manual
   push:
     tags:
-      - 'v2*'           # hanya tag dengan huruf kecil "v"
+      - 'V2*'           # hanya tag dengan huruf kecil "v"
 
 permissions:
   contents: write      # penting! biar bisa bikin release
