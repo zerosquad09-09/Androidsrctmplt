@@ -4,7 +4,7 @@ on:
   workflow_dispatch:   # manual
   push:
     tags:
-      - 'v2*'           # tag lowercase
+      - 'V2*'           # tag lowercase
 
 permissions:
   contents: write      # penting! biar bisa bikin release
