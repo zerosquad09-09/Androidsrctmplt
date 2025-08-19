@@ -26,4 +26,4 @@ jobs:
             libs/release/poing-godot-admob-core-v1.0.1-release.aar
             libs/release/poing-godot-admob-ads-v1.0.1-release.aar
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
