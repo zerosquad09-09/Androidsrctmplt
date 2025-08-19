@@ -67,7 +67,7 @@ jobs:
           gradle-${{ runner.os }}-
 
     - name: Clean Gradle Cache (Optional)
-      run: ./gradlew cleanBuildCache
+      run: ./gradlew clean
 
     - name: Build with Gradle
       env:
