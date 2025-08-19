@@ -45,11 +45,6 @@ jobs:
         }
 
         download_aar https://github.com/godotengine/godot/releases/download/4.4.1-stable/godot-lib.4.4.1.stable.template_release.aar libs/release/godot-lib.4.4.1.stable.template_release.aar
-        download_aar https://github.com/zerosquad09-09/File/blob/main/poing-godot-admob-adcolony-v1.0.0-release.aar libs/release/poing-godot-admob-adcolony-v1.0.0-release.aar
-        download_aar https://github.com/zerosquad09-09/File/blob/main/poing-godot-admob-ads-v1.0.1-release.aar libs/release/poing-godot-admob-ads-v1.0.1-release.aar
-        download_aar https://github.com/zerosquad09-09/File/blob/main/poing-godot-admob-core-v1.0.1-release.aar libs/release/poing-godot-admob-core-v1.0.1-release.aar
-        download_aar https://github.com/zerosquad09-09/File/blob/main/poing-godot-admob-meta-v1.0.0-release.aar libs/release/poing-godot-admob-meta-v1.0.0-release.aar
-        download_aar https://github.com/zerosquad09-09/File/blob/main/poing-godot-admob-vungle-v1.0.0-release.aar libs/release/poing-godot-admob-vungle-v1.0.0-release.aar
 
     - name: Decode and Save Keystore
       env:
