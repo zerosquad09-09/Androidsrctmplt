@@ -4,7 +4,7 @@ on:
   workflow_dispatch:   # manual
   push:
     tags:
-      - 'V2*'           # hanya tag dengan huruf kecil "v"
+      - 'v2*'           # tag lowercase
 
 permissions:
   contents: write      # penting! biar bisa bikin release
@@ -19,11 +19,8 @@ jobs:
       - name: Upload AAR files to Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: |
-            libs/release/poing-godot-admob-vungle-v1.0.0-release.aar
-            libs/release/poing-godot-admob-meta-v1.0.0-release.aar
-            libs/release/poing-godot-admob-adcolony-v1.0.0-release.aar
-            libs/release/poing-godot-admob-core-v1.0.1-release.aar
-            libs/release/poing-godot-admob-ads-v1.0.1-release.aar
+            libs/release/*.aar
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
